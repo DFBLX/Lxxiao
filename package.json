@@ -1,0 +1,11 @@
+{
+  "name": "jwt-login-demo",
+  "version": "1.0.0",
+  "description": "A minimal JWT login demo using Node.js built-ins",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  }
+}
