@@ -1,43 +1,45 @@
-# JWT 登录 Demo
+# 拍照识别物品（移动端）
 
-一个基于 Node.js 内置模块（无第三方依赖）的最小 JWT 登录示例。
+这是一个可在手机浏览器/PWA 使用的拍照识别项目：
 
-## 功能
+- 打开摄像头拍照
+- 使用 TensorFlow.js + COCO-SSD 模型进行物品识别
+- 显示前 5 个识别结果与置信度
+- 支持 PWA（可添加到手机桌面）
 
-- `POST /login`：用户名密码登录，返回 JWT
-- `GET /profile`：需要 Bearer Token 的受保护接口
+> 仓库中保留了原有 JWT 登录接口（`/login`、`/profile`）用于演示后端能力。
 
-## 快速开始
+## 启动
 
 ```bash
 npm start
 ```
 
-服务启动后访问：`http://localhost:3000`
+打开：`http://localhost:3000`
 
-## 演示账号
+## 手机使用方式
+
+1. 将服务部署到可公网访问的 HTTPS 地址（摄像头权限通常要求 HTTPS）。
+2. 手机上打开该地址。
+3. 点击浏览器“添加到主屏幕”，即可像 App 一样使用。
+
+## 生成“移动端软件包”（桌面 ZIP）
+
+已提供一个可分发的前端软件包（PWA 文件包）：
+
+```bash
+mkdir -p ~/Desktop
+zip -r ~/Desktop/object-recognizer-mobile-package.zip public README.md package.json app.js server.js
+```
+
+该 ZIP 可传到手机或服务器进行部署；部署后即可在手机上直接使用。
+
+## JWT 演示账号
 
 - 用户名：`admin`
 - 密码：`123456`
 
-## API 示例
-
-### 1. 登录获取 Token
-
-```bash
-curl -X POST http://localhost:3000/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"123456"}'
-```
-
-### 2. 使用 Token 访问受保护接口
-
-```bash
-curl http://localhost:3000/profile \
-  -H "Authorization: Bearer <your_token>"
-```
-
-## 运行测试
+## 测试
 
 ```bash
 npm test
