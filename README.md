@@ -23,16 +23,23 @@ npm start
 2. 手机上打开该地址。
 3. 点击浏览器“添加到主屏幕”，即可像 App 一样使用。
 
-## 生成“移动端软件包”（桌面 ZIP）
-
-已提供一个可分发的前端软件包（PWA 文件包）：
+## 一键生成“移动端软件包”（自动复制到桌面）
 
 ```bash
-mkdir -p ~/Desktop
-zip -r ~/Desktop/object-recognizer-mobile-package.zip public README.md package.json app.js server.js
+npm run package:mobile
 ```
 
-该 ZIP 可传到手机或服务器进行部署；部署后即可在手机上直接使用。
+脚本会自动把包复制到这些位置（谁存在就用谁）：
+
+- `~/Desktop/object-recognizer-mobile-package.zip`
+- `./Desktop/object-recognizer-mobile-package.zip`（仓库内）
+- `~/桌面/object-recognizer-mobile-package.zip`（中文桌面环境）
+
+## 立即“打开”软件包（解压查看）
+
+```bash
+unzip -o ~/Desktop/object-recognizer-mobile-package.zip -d ~/Desktop/object-recognizer-mobile-package
+```
 
 ## JWT 演示账号
 
