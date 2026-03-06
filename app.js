@@ -1,7 +1,10 @@
 const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'demo-secret-key';
 const TOKEN_EXPIRES_SECONDS = 60 * 60;
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const DEMO_USER = {
   id: 1,
@@ -83,6 +86,33 @@ function jsonResponse(res, statusCode, body) {
   res.end(JSON.stringify(body));
 }
 
+function serveStatic(req, res) {
+  const urlPath = req.url === '/' ? '/index.html' : req.url;
+  const safePath = path.normalize(urlPath).replace(/^([.][.][/\\])+/, '');
+  const filePath = path.join(PUBLIC_DIR, safePath);
+
+  if (!filePath.startsWith(PUBLIC_DIR)) {
+    return false;
+  }
+
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    return false;
+  }
+
+  const ext = path.extname(filePath);
+  const types = {
+    '.html': 'text/html; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.webmanifest': 'application/manifest+json; charset=utf-8',
+    '.svg': 'image/svg+xml; charset=utf-8'
+  };
+
+  res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream' });
+  fs.createReadStream(filePath).pipe(res);
+  return true;
+}
+
 async function parseJsonBody(req) {
   const chunks = [];
 
@@ -99,14 +129,8 @@ async function parseJsonBody(req) {
 }
 
 async function requestHandler(req, res) {
-  if (req.method === 'GET' && req.url === '/') {
-    return jsonResponse(res, 200, {
-      message: 'JWT 登录 Demo 已启动',
-      endpoints: {
-        login: 'POST /login',
-        profile: 'GET /profile (需要 Bearer Token)'
-      }
-    });
+  if (req.method === 'GET' && serveStatic(req, res)) {
+    return;
   }
 
   if (req.method === 'POST' && req.url === '/login') {
