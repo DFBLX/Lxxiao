@@ -25,9 +25,12 @@ async function makeRequest(server, { method, path, body, headers = {} }) {
       res.on('data', (chunk) => chunks.push(chunk));
       res.on('end', () => {
         const raw = Buffer.concat(chunks).toString('utf8');
+        const contentType = res.headers['content-type'] || '';
+
         resolve({
           statusCode: res.statusCode,
-          body: raw ? JSON.parse(raw) : {}
+          contentType,
+          body: contentType.includes('application/json') && raw ? JSON.parse(raw) : raw
         });
       });
     });
@@ -37,6 +40,25 @@ async function makeRequest(server, { method, path, body, headers = {} }) {
     req.end();
   });
 }
+
+test('serves web app on /', async () => {
+  const server = http.createServer(requestHandler);
+  server.listen(0, '127.0.0.1');
+  await once(server, 'listening');
+
+  try {
+    const homeRes = await makeRequest(server, {
+      method: 'GET',
+      path: '/'
+    });
+
+    assert.equal(homeRes.statusCode, 200);
+    assert.match(homeRes.contentType, /text\/html/);
+    assert.match(homeRes.body, /拍照识别物品/);
+  } finally {
+    server.close();
+  }
+});
 
 test('JWT login flow works', async () => {
   const server = http.createServer(requestHandler);
