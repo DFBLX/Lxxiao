@@ -1,81 +1,125 @@
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const snapshot = document.getElementById('snapshot');
-const statusEl = document.getElementById('status');
-const resultList = document.getElementById('results');
-const startBtn = document.getElementById('startBtn');
-const captureBtn = document.getElementById('captureBtn');
-const retryBtn = document.getElementById('retryBtn');
+const tracks = [
+  {
+    title: '清晨电台',
+    artist: 'SoundHelix',
+    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+  },
+  {
+    title: '午后微风',
+    artist: 'SoundHelix',
+    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
+  },
+  {
+    title: '夜晚漫步',
+    artist: 'SoundHelix',
+    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
+  }
+];
 
-let stream;
-let model;
+const audio = document.getElementById('audio');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const progress = document.getElementById('progress');
+const volume = document.getElementById('volume');
+const trackTitle = document.getElementById('trackTitle');
+const trackArtist = document.getElementById('trackArtist');
+const timeText = document.getElementById('timeText');
+const playlist = document.getElementById('playlist');
 
-async function loadModel() {
-  statusEl.textContent = '正在加载识别模型...';
-  model = await cocoSsd.load();
-  statusEl.textContent = '模型已加载，点击“开启摄像头”。';
+let currentIndex = 0;
+
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+  const mins = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const secs = Math.floor(seconds % 60)
+    .toString()
+    .padStart(2, '0');
+  return `${mins}:${secs}`;
 }
 
-function renderPredictions(predictions) {
-  resultList.innerHTML = '';
-  if (!predictions.length) {
+function renderPlaylist() {
+  playlist.innerHTML = '';
+
+  tracks.forEach((track, index) => {
     const li = document.createElement('li');
-    li.textContent = '未识别到明显物体，请换个角度再试。';
-    resultList.appendChild(li);
-    return;
-  }
-
-  predictions
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-    .forEach((item) => {
-      const li = document.createElement('li');
-      li.textContent = `${item.class}（置信度 ${(item.score * 100).toFixed(1)}%）`;
-      resultList.appendChild(li);
+    const btn = document.createElement('button');
+    btn.className = `track-btn ${index === currentIndex ? 'active' : ''}`;
+    btn.innerHTML = `<strong>${track.title}</strong><span>${track.artist}</span>`;
+    btn.addEventListener('click', async () => {
+      loadTrack(index);
+      await audio.play();
+      playBtn.textContent = '暂停';
     });
+    li.appendChild(btn);
+    playlist.appendChild(li);
+  });
 }
 
-startBtn.addEventListener('click', async () => {
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment' },
-      audio: false
-    });
-    video.srcObject = stream;
-    captureBtn.disabled = false;
-    statusEl.textContent = '摄像头已开启，请点击“拍照识别”。';
-  } catch (error) {
-    statusEl.textContent = `无法开启摄像头：${error.message}`;
+function loadTrack(index) {
+  currentIndex = (index + tracks.length) % tracks.length;
+  const track = tracks[currentIndex];
+
+  audio.src = track.url;
+  trackTitle.textContent = track.title;
+  trackArtist.textContent = track.artist;
+  progress.value = '0';
+  timeText.textContent = '00:00 / 00:00';
+  renderPlaylist();
+}
+
+playBtn.addEventListener('click', async () => {
+  if (!audio.src) {
+    loadTrack(currentIndex);
+  }
+
+  if (audio.paused) {
+    await audio.play();
+    playBtn.textContent = '暂停';
+  } else {
+    audio.pause();
+    playBtn.textContent = '播放';
   }
 });
 
-captureBtn.addEventListener('click', async () => {
-  if (!model) {
-    statusEl.textContent = '模型尚未加载完成，请稍后。';
-    return;
-  }
-
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  snapshot.src = canvas.toDataURL('image/jpeg', 0.9);
-
-  video.classList.add('hidden');
-  snapshot.classList.remove('hidden');
-  retryBtn.classList.remove('hidden');
-
-  statusEl.textContent = '识别中...';
-  const predictions = await model.detect(canvas);
-  statusEl.textContent = '识别完成：';
-  renderPredictions(predictions);
+prevBtn.addEventListener('click', async () => {
+  loadTrack(currentIndex - 1);
+  await audio.play();
+  playBtn.textContent = '暂停';
 });
 
-retryBtn.addEventListener('click', () => {
-  snapshot.classList.add('hidden');
-  video.classList.remove('hidden');
-  retryBtn.classList.add('hidden');
-  resultList.innerHTML = '';
-  statusEl.textContent = '请再次拍照。';
+nextBtn.addEventListener('click', async () => {
+  loadTrack(currentIndex + 1);
+  await audio.play();
+  playBtn.textContent = '暂停';
+});
+
+audio.addEventListener('timeupdate', () => {
+  const value = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+  progress.value = String(Math.floor(value));
+  timeText.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+});
+
+progress.addEventListener('input', () => {
+  if (!audio.duration) return;
+  audio.currentTime = (Number(progress.value) / 100) * audio.duration;
+});
+
+volume.addEventListener('input', () => {
+  audio.volume = Number(volume.value) / 100;
+});
+
+audio.addEventListener('ended', async () => {
+  loadTrack(currentIndex + 1);
+  await audio.play();
+  playBtn.textContent = '暂停';
+});
+
+audio.addEventListener('error', () => {
+  timeText.textContent = '当前歌曲加载失败，请切换下一首重试。';
+  playBtn.textContent = '播放';
 });
 
 if ('serviceWorker' in navigator) {
@@ -84,6 +128,5 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-loadModel().catch((error) => {
-  statusEl.textContent = `模型加载失败：${error.message}`;
-});
+loadTrack(currentIndex);
+audio.volume = Number(volume.value) / 100;

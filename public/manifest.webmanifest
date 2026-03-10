@@ -1,11 +1,11 @@
 {
-  "name": "拍照识别物品",
-  "short_name": "物品识别",
+  "name": "在线音乐播放器",
+  "short_name": "音乐播放器",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f1f5f9",
+  "background_color": "#0f172a",
   "theme_color": "#0f172a",
-  "description": "使用摄像头拍照识别物品的移动端 PWA 应用。",
+  "description": "可在线播放网络歌曲的移动端 PWA 应用。",
   "icons": [
     {
       "src": "/icon-192.svg",

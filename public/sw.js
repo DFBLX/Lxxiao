@@ -1,4 +1,4 @@
-const CACHE_NAME = 'object-recognizer-v1';
+const CACHE_NAME = 'online-music-player-v1';
 const URLS = ['/', '/styles.css', '/mobile-app.js', '/manifest.webmanifest', '/icon-192.svg', '/icon-512.svg'];
 
 self.addEventListener('install', (event) => {

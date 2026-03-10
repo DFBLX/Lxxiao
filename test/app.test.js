@@ -54,7 +54,7 @@ test('serves web app on /', async () => {
 
     assert.equal(homeRes.statusCode, 200);
     assert.match(homeRes.contentType, /text\/html/);
-    assert.match(homeRes.body, /拍照识别物品/);
+    assert.match(homeRes.body, /在线音乐播放器/);
   } finally {
     server.close();
   }
