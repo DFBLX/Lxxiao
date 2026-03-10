@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-PKG_NAME="object-recognizer-mobile-package.zip"
+PKG_NAME="online-music-player-package.zip"
 
 TARGETS=(
   "$HOME/Desktop"
@@ -14,11 +14,16 @@ if [ -d "$HOME/桌面" ] || [ ! -e "$HOME/桌面" ]; then
   TARGETS+=("$HOME/桌面")
 fi
 
+# 兼容 WSL 下的 Windows 桌面，例如 D:\desktop
+if [ -d "/mnt/d/desktop" ] || [ ! -e "/mnt/d/desktop" ]; then
+  TARGETS+=("/mnt/d/desktop")
+fi
+
 mkdir -p "$ROOT_DIR/.artifacts"
 TMP_ZIP="$ROOT_DIR/.artifacts/$PKG_NAME"
 
 cd "$ROOT_DIR"
-zip -rq "$TMP_ZIP" public README.md package.json app.js server.js test
+zip -rq "$TMP_ZIP" public README.md package.json app.js server.js test scripts
 
 echo "打包完成: $TMP_ZIP"
 for dir in "${TARGETS[@]}"; do
@@ -28,4 +33,4 @@ for dir in "${TARGETS[@]}"; do
 done
 
 echo "\n可直接解压查看（示例）:"
-echo "unzip -o \"$HOME/Desktop/$PKG_NAME\" -d \"$HOME/Desktop/object-recognizer-mobile-package\""
+echo "unzip -o \"$HOME/Desktop/$PKG_NAME\" -d \"$HOME/Desktop/online-music-player\""

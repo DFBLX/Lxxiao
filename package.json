@@ -1,7 +1,7 @@
 {
-  "name": "jwt-login-demo",
+  "name": "online-music-player",
   "version": "1.0.0",
-  "description": "A minimal JWT login demo using Node.js built-ins",
+  "description": "A minimal online music player with JWT demo APIs",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

@@ -3,37 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>拍照识别物品</title>
+  <title>在线音乐播放器</title>
   <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <main class="container">
-    <h1>拍照识别物品</h1>
-    <p class="subtitle">使用手机摄像头拍照，并基于 TensorFlow.js 模型识别物品。</p>
+    <h1>在线音乐播放器</h1>
+    <p class="subtitle">可直接在线播放网络歌曲，支持切歌、进度和音量控制。</p>
 
-    <section class="camera-card">
-      <video id="video" autoplay playsinline muted></video>
-      <canvas id="canvas" class="hidden"></canvas>
-      <img id="snapshot" class="hidden" alt="拍照预览" />
+    <section class="player-card">
+      <div class="now-playing">
+        <p class="label">正在播放</p>
+        <h2 id="trackTitle">请选择歌曲</h2>
+        <p id="trackArtist">-</p>
+      </div>
 
-      <div class="buttons">
-        <button id="startBtn">开启摄像头</button>
-        <button id="captureBtn" disabled>拍照识别</button>
-        <button id="retryBtn" class="ghost hidden">重新拍照</button>
+      <audio id="audio" preload="metadata"></audio>
+
+      <div class="controls">
+        <button id="prevBtn" class="ghost">上一首</button>
+        <button id="playBtn">播放</button>
+        <button id="nextBtn" class="ghost">下一首</button>
+      </div>
+
+      <div class="range-group">
+        <label for="progress">播放进度</label>
+        <input id="progress" type="range" value="0" min="0" max="100" step="1" />
+        <p id="timeText">00:00 / 00:00</p>
+      </div>
+
+      <div class="range-group">
+        <label for="volume">音量</label>
+        <input id="volume" type="range" value="80" min="0" max="100" step="1" />
       </div>
     </section>
 
-    <section class="result-card">
-      <h2>识别结果</h2>
-      <p id="status">模型加载中，请稍候...</p>
-      <ul id="results"></ul>
+    <section class="playlist-card">
+      <h3>在线歌单</h3>
+      <ul id="playlist"></ul>
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3"></script>
   <script src="/mobile-app.js"></script>
 </body>
 </html>
